@@ -48,14 +48,23 @@ function StaffPanel({ onLogout }) {
     alert('🎉 Book Added Successfully!');
   };
 
-  // 1. DELETE BOOK OPTION
-  const handleDeleteBook = (bookId, bookTitle) => {
-    const confirmDelete = window.confirm(`Bro, "${bookTitle}" புக்கை டேட்டாபேஸ்ல இருந்து டெலீட் பண்ணிடலாமா?`);
-    if (confirmDelete) {
-      setBooks(books.filter(book => book.id !== bookId));
-      alert('🗑️ Book Deleted Successfully!');
-    }
-  };
+  // Database-la delete panna code
+const handleDeleteBook = async (id) => {
+  // 1. Supabase-kitta solrom: "Hey, 'books' table-la indha 'id' irukura row-ah delete pannu"
+  const { error } = await supabase
+    .from('books')
+    .delete()
+    .eq('id', id); // Idhu dhaan condition (Yentha book-ah delete pannanum-nu)
+
+  // 2. Database-la delete aayiduchuna (no error), nammaloada local list-laiyum delete panrom
+  if (!error) {
+    setBooks(books.filter((book) => book.id !== id));
+    alert("Book deleted successfully!");
+  } else {
+    // Database-la delete aagalena error msg kaatrom
+    alert("Error deleting: " + error.message);
+  }
+};
 
   // 2. RENEWAL OPTION
   const handleRenewal = (rollNo, bookId) => {
@@ -91,10 +100,21 @@ function StaffPanel({ onLogout }) {
       alert('💰 Fine Amount Updated Successfully!');
     }
   };
+// 1. Import your supabase client
+import { supabase } from '../supabaseClient'; 
+
+// 2. Inside your StaffPanel function:
 useEffect(() => {
-    localStorage.setItem("raakBooks", JSON.stringify(books));
-    localStorage.setItem("raakAllocations", JSON.stringify(allocations));
-  }, [books, allocations]);
+  const fetchBooks = async () => {
+    let { data, error } = await supabase.from('books').select('*');
+    if (error) {
+      console.error("Error fetching data: ", error);
+    } else {
+      setBooks(data); // Database data-va unga app-kulla kodukudhu
+    }
+  };
+  fetchBooks();
+}, []);
   return (
     <div style={{
       background: 'rgba(255, 255, 255, 0.05)',
