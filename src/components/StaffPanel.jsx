@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 function StaffPanel({ onLogout }) {
-  // Initial Books List State
-  const [books, setBooks] = useState([
-    { id: 'B001', title: 'Core Java Programming', author: 'E. Balagurusamy', copies: 5, status: 'Active' },
-    { id: 'B002', title: 'Database System Concepts', author: 'Korth', copies: 2, status: 'Active' },
-    { id: 'B003', title: 'Web Technologies', author: 'Achyut Godbole', copies: 4, status: 'Active' },
-  ]);
+// Books load logic
+  const [books, setBooks] = useState(() => {
+    const saved = localStorage.getItem("raakBooks");
+    return saved ? JSON.parse(saved) : [
+      { id: 'B001', title: 'Core Java Programming', author: 'E. Balagurusamy', copies: 5, status: 'Active' },
+      { id: 'B002', title: 'Database System Concepts', author: 'Korth', copies: 2, status: 'Active' }
+    ];
+  });
 
-  // Student Book Allocation & Fine Tracking State
-  const [allocations, setAllocations] = useState([
-    { rollNo: '24MCA01', studentName: 'Sakthi', bookId: 'B002', bookTitle: 'Database System Concepts', dueDate: '2026-05-15', fine: 40 },
-    { rollNo: '24MCA15', studentName: 'Prakash', bookId: 'B001', bookTitle: 'Core Java Programming', dueDate: '2026-06-01', fine: 0 },
-  ]);
+  // Allocations load logic
+  const [allocations, setAllocations] = useState(() => {
+    const saved = localStorage.getItem("raakAllocations");
+    return saved ? JSON.parse(saved) : [
+      { rollNo: '24MCA01', studentName: 'Sakthi', bookId: 'B002', bookTitle: 'Database System Concepts', dueDate: '2026-05-15', fine: 40 }
+    ];
+  });
 
   // Form States for Adding New Book
   const [newTitle, setNewTitle] = useState('');
@@ -87,7 +91,10 @@ function StaffPanel({ onLogout }) {
       alert('💰 Fine Amount Updated Successfully!');
     }
   };
-
+useEffect(() => {
+    localStorage.setItem("raakBooks", JSON.stringify(books));
+    localStorage.setItem("raakAllocations", JSON.stringify(allocations));
+  }, [books, allocations]);
   return (
     <div style={{
       background: 'rgba(255, 255, 255, 0.05)',
